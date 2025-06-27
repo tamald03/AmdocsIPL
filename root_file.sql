@@ -5,7 +5,9 @@ CREATE TABLE team (
     team_id INT AUTO_INCREMENT PRIMARY KEY,
     team_name VARCHAR(100) NOT NULL UNIQUE,
     team_owner VARCHAR(100) NOT NULL,
-    ground_id VARCHAR(10)
+    ground_id VARCHAR(10),
+    team_budget int,
+    doc date
 );
  
 -- Coaches

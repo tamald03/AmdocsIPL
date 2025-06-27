@@ -2,17 +2,18 @@ USE amdocs_ipl;
  
 -- Teams
 CREATE TABLE team (
-    team_id INT AUTO_INCREMENT PRIMARY KEY,
+    team_id varchar(10) not null PRIMARY KEY,
     team_name VARCHAR(100) NOT NULL UNIQUE,
     team_owner VARCHAR(100) NOT NULL,
     ground_id VARCHAR(10),
     team_budget int,
     doc date
+    team_password varchar(20) not null
 );
  
 -- Coaches
 CREATE TABLE coach (
-    coach_id INT AUTO_INCREMENT PRIMARY KEY,
+    coach_id varchar(10) not null PRIMARY KEY,
     coach_name VARCHAR(100) NOT NULL,
     coach_role VARCHAR(100),
     coach_country VARCHAR(100),
@@ -23,7 +24,7 @@ CREATE TABLE coach (
  
 -- Players
 CREATE TABLE player (
-    player_id INT AUTO_INCREMENT PRIMARY KEY,
+    player_id varchar(10) not null PRIMARY KEY,
     player_name VARCHAR(100) NOT NULL,
     player_age INT,
     player_country VARCHAR(50),
@@ -31,13 +32,14 @@ CREATE TABLE player (
     team_id INT,
     match_id int,
     iscaptain BOOLEAN DEFAULT FALSE,
+    player_password varchar(10) not null,
     FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE SET NULL,
     FOREIGN KEY (match_id) REFERENCES match_schedule(match_id) on delete set null
 );
  
 -- Umpires
 CREATE TABLE umpire (
-    umpire_id INT AUTO_INCREMENT PRIMARY KEY,
+    umpire_id varchar(10) not null PRIMARY KEY,
     umpire_name VARCHAR(100) NOT NULL,
     umpire_country VARCHAR(50),
     umpire_work_exp INT
@@ -45,14 +47,14 @@ CREATE TABLE umpire (
  
 -- Grounds
 CREATE TABLE ground (
-    ground_id INT AUTO_INCREMENT PRIMARY KEY,
+    ground_id varchar(10) not null PRIMARY KEY,
     ground_name VARCHAR(100) NOT NULL,
     ground_location VARCHAR(100)
 );
  
 -- Matches
 CREATE TABLE match_schedule (
-    match_id INT AUTO_INCREMENT PRIMARY KEY,
+    match_id varchar(10) not null PRIMARY KEY,
     team1_id INT,
     team2_id INT,
     ground_id INT,
@@ -68,7 +70,6 @@ CREATE TABLE match_schedule (
 );
 
 -- Create table for score_database
-
 CREATE table ind_score(
     player_id int not null primary key,
     team_id int not null,
@@ -83,4 +84,11 @@ CREATE table ind_score(
     foreign key (match_id) REFERENCES match_schedule(match_id)
 );
 
+--Management
+create table management(
+    mngt_user="root",
+    mngt_password="abc@123"
+);
+
+---- Inserting the data
 

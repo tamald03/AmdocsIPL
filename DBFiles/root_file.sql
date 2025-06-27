@@ -14,7 +14,7 @@ CREATE TABLE team (
     team_owner VARCHAR(100) NOT NULL,
     ground_id VARCHAR(10),
     team_budget INT,
-    doc DATE,
+    create_date DATE,
     team_password VARCHAR(20) NOT NULL,
     FOREIGN KEY (ground_id) REFERENCES ground(ground_id) ON DELETE SET NULL
 );
@@ -48,8 +48,9 @@ CREATE TABLE match_schedule (
     umpire2_id VARCHAR(10),
     match_date DATE,
     toss VARCHAR(10),
+    match_winner varchar(10),
     match_status ENUM('Completed', 'Upcoming', 'Cancelled', 'On-going') NOT NULL,
-    match_result ENUM('Win','Loss', 'Draw', 'Cancel') NOT NULL,
+    match_result ENUM('Win','Loss', 'Draw', 'Cancel', 'X') NOT NULL,
     FOREIGN KEY (team1_id) REFERENCES team(team_id),
     FOREIGN KEY (team2_id) REFERENCES team(team_id),
     FOREIGN KEY (ground_id) REFERENCES ground(ground_id),
@@ -108,7 +109,7 @@ INSERT INTO ground (ground_id, ground_name, ground_location) VALUES
 
 
 --teams
-INSERT INTO team (team_id, team_name, team_owner, ground_id, team_budget, doc, team_password) VALUES
+INSERT INTO team (team_id, team_name, team_owner, ground_id, team_budget, create_date, team_password) VALUES
 ('T001', 'Mumbai Indians', 'Reliance Industries', 'G001', 95000000, '2008-04-01', 'mi@123'),
 ('T002', 'Kolkata Knight Riders', 'Red Chillies Entertainment', 'G002', 91000000, '2008-04-01', 'kkr@123'),
 ('T003', 'Royal Challengers Bangalore', 'United Spirits', 'G003', 92000000, '2008-04-01', 'rcb@123'),
@@ -221,20 +222,20 @@ INSERT INTO umpire (umpire_id, umpire_name, umpire_country, umpire_work_exp) VAL
 ('U010', 'Michael Gough', 'England', 14);
 
 --matches
-INSERT INTO match_schedule (match_id, team1_id, team2_id, ground_id, umpire1_id, umpire2_id, match_date, toss, match_status, match_result) VALUES
-('M001', 'T001', 'T002', 'G001', 'U003', 'U004', '2025-04-01', 'T001', 'Completed', 'Win'),
-('M002', 'T001', 'T003', 'G001', 'U005', 'U006', '2025-04-02', 'T001', 'Completed', 'Loss'),
-('M003', 'T001', 'T004', 'G001', 'U001', 'U002', '2025-04-03', 'T001', 'Cancelled', 'Cancel'),
-('M004', 'T002', 'T003', 'G002', 'U003', 'U004', '2025-04-04', 'T002', 'Completed', 'Loss'),
-('M005', 'T002', 'T004', 'G002', 'U005', 'U006', '2025-04-05', 'T002', 'Completed', 'Draw'),
-('M006', 'T003', 'T004', 'G003', 'U001', 'U002', '2025-04-06', 'T003', 'Completed', 'Loss'),
-('M007', 'T001', 'T004', 'G001', 'U007', 'U008', '2025-04-10', 'T001', 'Completed', 'Win'),
-('M008', 'T002', 'T003', 'G002', 'U009', 'U010', '2025-04-11', 'T002', 'Completed', 'Loss'),
-('M009', 'T001', 'T002', 'G004', 'U001', 'U003', '2025-04-13', 'T002', 'Cancelled', 'Cancel'),
-('M010', 'T001', 'T003', 'G001', 'U002', 'U003', '2025-04-14', 'T003', 'On-going', 'Draw'),
-('M011', 'T004', 'T002', 'G004', 'U004', 'U005', '2025-04-15', 'T004', 'Upcoming', 'Draw'),
-('M012', 'T003', 'T002', 'G003', 'U006', 'U001', '2025-04-16', 'T002', 'Upcoming', 'Draw'),
-('M013', 'T004', 'T001', 'G004', 'U002', 'U006', '2025-04-17', 'T001', 'Upcoming', 'Draw');
+INSERT INTO match_schedule (match_id, team1_id, team2_id, ground_id, umpire1_id, umpire2_id, match_date, toss, match_winner, match_status, match_result) VALUES
+('M001', 'T001', 'T002', 'G001', 'U001', 'U002', '2025-04-01', 'T001', 'T001', 'Completed', 'Win'),
+('M002', 'T003', 'T004', 'G003', 'U003', 'U004', '2025-04-02', 'T003', 'T004', 'Completed', 'Win'),
+('M003', 'T002', 'T004', 'G002', 'U005', 'U006', '2025-04-03', 'T004', NULL, 'Cancelled', 'Cancel'),
+('M004', 'T004', 'T001', 'G004', 'U007', 'U008', '2025-04-04', 'T004', 'T001', 'Completed', 'Win'),
+('M005', 'T001', 'T003', 'G001', 'U009', 'U010', '2025-04-05', 'T003', 'T001', 'Completed', 'Win'),
+('M006', 'T002', 'T003', 'G002', 'U001', 'U003', '2025-04-06', 'T002', 'T003', 'Completed', 'Win'),
+('M007', 'T003', 'T001', 'G003', 'U004', 'U005', '2025-04-07', 'T001', 'T001', 'Completed', 'Win'),
+('M008', 'T004', 'T002', 'G004', 'U006', 'U007', '2025-04-08', 'T004', NULL, 'Cancelled', 'Cancel'),
+('M009', 'T003', 'T002', 'G003', 'U008', 'U009', '2025-04-09', 'T003', 'T003', 'Completed', 'Win'),
+('M010', 'T004', 'T001', 'G004', 'U010', 'U001', '2025-04-10', 'T004', NULL, 'Upcoming', 'X'),
+('M011', 'T001', 'T004', 'G001', 'U002', 'U003', '2025-04-11', 'T001', NULL, 'Upcoming', 'X'),
+('M012', 'T002', 'T003', 'G002', 'U004', 'U005', '2025-04-12', 'T002', NULL, 'Upcoming', 'X'),
+('M013', 'T001', 'T002', 'G001', 'U006', 'U007', '2025-04-13', 'T002', NULL, 'Upcoming', 'X');
 
 --Leaderboard
 INSERT INTO ind_score (player_id, team_id, match_id, runs, wickets, catches, sixes, fours) VALUES

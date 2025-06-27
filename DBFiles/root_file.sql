@@ -1,67 +1,69 @@
 USE amdocs_ipl;
- 
+
 -- Teams
 CREATE TABLE team (
-    team_id varchar(10) not null PRIMARY KEY,
+    team_id VARCHAR(10) NOT NULL PRIMARY KEY,
     team_name VARCHAR(100) NOT NULL UNIQUE,
     team_owner VARCHAR(100) NOT NULL,
     ground_id VARCHAR(10),
-    team_budget int,
-    doc date
-    team_password varchar(20) not null
+    team_budget INT,
+    doc DATE,
+    team_password VARCHAR(20) NOT NULL,
+    FOREIGN KEY (ground_id) REFERENCES ground(ground_id) ON DELETE SET NULL
 );
- 
+
 -- Coaches
 CREATE TABLE coach (
-    coach_id varchar(10) not null PRIMARY KEY,
+    coach_id VARCHAR(10) NOT NULL PRIMARY KEY,
     coach_name VARCHAR(100) NOT NULL,
     coach_role VARCHAR(100),
     coach_country VARCHAR(100),
     coach_work_exp INT,
-    team_id INT,
+    team_id VARCHAR(10),
     FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE SET NULL
 );
- 
+
 -- Players
 CREATE TABLE player (
-    player_id varchar(10) not null PRIMARY KEY,
+    player_id VARCHAR(10) NOT NULL PRIMARY KEY,
     player_name VARCHAR(100) NOT NULL,
     player_age INT,
     player_country VARCHAR(50),
     player_role ENUM('Batsman', 'Bowler', 'All-rounder', 'Wicket-keeper') NOT NULL,
-    team_id INT,
-    match_id int,
+    team_id VARCHAR(10),
+    match_id VARCHAR(10),
     iscaptain BOOLEAN DEFAULT FALSE,
-    player_password varchar(10) not null,
+    player_password VARCHAR(10) NOT NULL,
     FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE SET NULL,
-    FOREIGN KEY (match_id) REFERENCES match_schedule(match_id) on delete set null
+    FOREIGN KEY (match_id) REFERENCES match_schedule(match_id) ON DELETE SET NULL
 );
- 
+
 -- Umpires
 CREATE TABLE umpire (
-    umpire_id varchar(10) not null PRIMARY KEY,
+    umpire_id VARCHAR(10) NOT NULL PRIMARY KEY,
     umpire_name VARCHAR(100) NOT NULL,
     umpire_country VARCHAR(50),
     umpire_work_exp INT
 );
- 
+
 -- Grounds
 CREATE TABLE ground (
-    ground_id varchar(10) not null PRIMARY KEY,
+    ground_id VARCHAR(10) NOT NULL PRIMARY KEY,
     ground_name VARCHAR(100) NOT NULL,
     ground_location VARCHAR(100)
 );
- 
+
 -- Matches
 CREATE TABLE match_schedule (
-    match_id varchar(10) not null PRIMARY KEY,
-    team1_id INT,
-    team2_id INT,
-    ground_id INT,
-    umpire1_id INT,
-    umpire2_id INT,
+    match_id VARCHAR(10) NOT NULL PRIMARY KEY,
+    team1_id VARCHAR(10),
+    team2_id VARCHAR(10),
+    ground_id VARCHAR(10),
+    umpire1_id VARCHAR(10),
+    umpire2_id VARCHAR(10),
     match_date DATE,
-    match_status enum('Completed', 'Upcoming', 'Cancelled', 'On-going') not null,
+    match_status ENUM('Completed', 'Upcoming', 'Cancelled', 'On-going') NOT NULL,
+    match_result ENUM('Win','Loss', 'Draw', 'Cancel') NOT NULL,
     FOREIGN KEY (team1_id) REFERENCES team(team_id),
     FOREIGN KEY (team2_id) REFERENCES team(team_id),
     FOREIGN KEY (ground_id) REFERENCES ground(ground_id),
@@ -69,26 +71,29 @@ CREATE TABLE match_schedule (
     FOREIGN KEY (umpire2_id) REFERENCES umpire(umpire_id)
 );
 
--- Create table for score_database
-CREATE table ind_score(
-    player_id int not null primary key,
-    team_id int not null,
-    match_id int,
-    runs int,
-    wickets int,
-    catches int,
-    sixes int,
-    fours int,
-    foreign key (player_id) REFERENCES player(player_id),
-    foreign key (team_id) REFERENCES team(team_id),
-    foreign key (match_id) REFERENCES match_schedule(match_id)
+-- Score Database
+CREATE TABLE ind_score (
+    player_id VARCHAR(10) NOT NULL PRIMARY KEY,
+    team_id VARCHAR(10) NOT NULL,
+    match_id VARCHAR(10),
+    runs INT,
+    wickets INT,
+    catches INT,
+    sixes INT,
+    fours INT,
+    FOREIGN KEY (player_id) REFERENCES player(player_id),
+    FOREIGN KEY (team_id) REFERENCES team(team_id),
+    FOREIGN KEY (match_id) REFERENCES match_schedule(match_id)
 );
 
---Management
-create table management(
-    mngt_user="root",
-    mngt_password="abc@123"
+-- Management
+CREATE TABLE management (
+    mngt_user VARCHAR(50) NOT NULL,
+    mngt_password VARCHAR(50) NOT NULL
 );
 
----- Inserting the data
+-- Insert default management user
+INSERT INTO management (mngt_user, mngt_password) VALUES ('root', 'abc@123');
 
+
+-- In

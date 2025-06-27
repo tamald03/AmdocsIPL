@@ -1,5 +1,5 @@
 # AmdocsIPL
-<img src="https://github.com/tamald03/AmdocsIPL/blob/main/logo.png" alt="AmdocsIPL Logo" width="300" height="200">
+<img src="https://github.com/tamald03/AmdocsIPL/blob/main/logo.png" alt="AmdocsIPL Logo" style="width:50%; height:auto;">
 
 A console based model application for players, teams and management for arrangement of **AmdocsIPL**. Totally based on Python and MySQL.
 

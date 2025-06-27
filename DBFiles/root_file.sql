@@ -15,7 +15,6 @@ CREATE TABLE coach (
     coach_id INT AUTO_INCREMENT PRIMARY KEY,
     coach_name VARCHAR(100) NOT NULL,
     coach_role VARCHAR(100),
-    coach_age INT,
     coach_country VARCHAR(100),
     coach_work_exp INT,
     team_id INT,

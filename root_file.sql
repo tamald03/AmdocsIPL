@@ -56,6 +56,7 @@ CREATE TABLE match_schedule (
     umpire1_id INT,
     umpire2_id INT,
     match_date DATE,
+    match_status enum('Completed', 'Upcoming', 'Cancelled', 'On-going') not null,
     FOREIGN KEY (team1_id) REFERENCES team(team_id),
     FOREIGN KEY (team2_id) REFERENCES team(team_id),
     FOREIGN KEY (ground_id) REFERENCES ground(ground_id),

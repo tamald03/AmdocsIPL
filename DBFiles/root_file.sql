@@ -30,8 +30,10 @@ CREATE TABLE player (
     player_country VARCHAR(50),
     player_role ENUM('Batsman', 'Bowler', 'All-rounder', 'Wicket-keeper') NOT NULL,
     team_id INT,
+    match_id int,
     iscaptain BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE SET NULL
+    FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE SET NULL,
+    FOREIGN KEY (match_id) REFERENCES match_schedule(match_id) on delete set null
 );
  
 -- Umpires
@@ -65,3 +67,21 @@ CREATE TABLE match_schedule (
     FOREIGN KEY (umpire1_id) REFERENCES umpire(umpire_id),
     FOREIGN KEY (umpire2_id) REFERENCES umpire(umpire_id)
 );
+
+-- Create table for score_database
+
+CREATE table ind_score(
+    player_id int not null primary key,
+    team_id int not null,
+    match_id int,
+    runs int,
+    wickets int,
+    catches int,
+    sixes int,
+    fours int,
+    foreign key (player_id) REFERENCES player(player_id),
+    foreign key (team_id) REFERENCES team(team_id),
+    foreign key (match_id) REFERENCES match_schedule(match_id)
+);
+
+

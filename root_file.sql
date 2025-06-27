@@ -1,62 +1,43 @@
-use amdocs_ipl;
-
+USE amdocs_ipl;
+ 
 -- Teams
 CREATE TABLE team (
     team_id INT AUTO_INCREMENT PRIMARY KEY,
     team_name VARCHAR(100) NOT NULL UNIQUE,
-    team_owner varchar(100) not null,
-    budget DECIMAL(10, 2),
-    ground_id varchar(10)
+    team_owner VARCHAR(100) NOT NULL,
+    ground_id VARCHAR(10)
 );
  
 -- Coaches
 CREATE TABLE coach (
     coach_id INT AUTO_INCREMENT PRIMARY KEY,
     coach_name VARCHAR(100) NOT NULL,
-    coach_role varchar(100),
-    coach_age int,
-    coach_country varchar(100),
-    coach_work_exp INT
+    coach_role VARCHAR(100),
+    coach_age INT,
+    coach_country VARCHAR(100),
+    coach_work_exp INT,
+    team_id INT,
+    FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE SET NULL
 );
  
 -- Players
 CREATE TABLE player (
     player_id INT AUTO_INCREMENT PRIMARY KEY,
     player_name VARCHAR(100) NOT NULL,
-    player_age int(4),
+    player_age INT,
     player_country VARCHAR(50),
     player_role ENUM('Batsman', 'Bowler', 'All-rounder', 'Wicket-keeper') NOT NULL,
-    base_price DECIMAL(10, 2) NOT NULL,
-    is_sold BOOLEAN DEFAULT FALSE,
-    player_sell_price int
+    team_id INT,
+    iscaptain BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE SET NULL
 );
  
--- Team-Player Mapping
-CREATE TABLE team_player (
-    team_id INT,
-    player_id INT,
-    iscaptain bool default false, 
-    bidding_price int, 
-    PRIMARY KEY (team_id, player_id),
-    FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE CASCADE,
-    FOREIGN KEY (player_id) REFERENCES player(player_id) ON DELETE CASCADE
-);
-
--- Team-Coach Mapping
-create table team_coach(
-	team_id int, 
-    coach_id int,
-    PRIMARY KEY (team_id, coach_id),
-    FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE CASCADE,
-    FOREIGN KEY (coach_id) REFERENCES coach(coach_id) ON DELETE CASCADE
-);
-
 -- Umpires
 CREATE TABLE umpire (
     umpire_id INT AUTO_INCREMENT PRIMARY KEY,
     umpire_name VARCHAR(100) NOT NULL,
     umpire_country VARCHAR(50),
-    umpire_work_exp int(3)
+    umpire_work_exp INT
 );
  
 -- Grounds
@@ -81,5 +62,3 @@ CREATE TABLE match_schedule (
     FOREIGN KEY (umpire1_id) REFERENCES umpire(umpire_id),
     FOREIGN KEY (umpire2_id) REFERENCES umpire(umpire_id)
 );
- 
-

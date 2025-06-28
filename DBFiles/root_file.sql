@@ -1,4 +1,106 @@
--- Insert default management user
+-- Create and select the database
+CREATE DATABASE IF NOT EXISTS amdocs_ipl;
+USE amdocs_ipl;
+
+-- Drop tables if they exist (optional, useful during development)
+DROP TABLE IF EXISTS ind_score, player, match_schedule, umpire, coach, team, ground, management;
+
+-- Ground table
+CREATE TABLE ground (
+    ground_id VARCHAR(10) NOT NULL PRIMARY KEY,
+    ground_name VARCHAR(100) NOT NULL,
+    ground_location VARCHAR(100)
+);
+
+-- Team table
+CREATE TABLE team (
+    team_id VARCHAR(10) NOT NULL PRIMARY KEY,
+    team_name VARCHAR(100) NOT NULL UNIQUE,
+    team_owner VARCHAR(100) NOT NULL,
+    ground_id VARCHAR(10),
+    team_budget INT,
+    create_date DATE,
+    team_password VARCHAR(20) NOT NULL,
+    FOREIGN KEY (ground_id) REFERENCES ground(ground_id) ON DELETE SET NULL
+);
+
+-- Coach table
+CREATE TABLE coach (
+    coach_id VARCHAR(10) NOT NULL PRIMARY KEY,
+    coach_name VARCHAR(100) NOT NULL,
+    coach_role VARCHAR(100),
+    coach_country VARCHAR(100),
+    coach_work_exp INT,
+    team_id VARCHAR(10),
+    FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE SET NULL
+);
+
+-- Umpire table
+CREATE TABLE umpire (
+    umpire_id VARCHAR(10) NOT NULL PRIMARY KEY,
+    umpire_name VARCHAR(100) NOT NULL,
+    umpire_country VARCHAR(50),
+    umpire_work_exp INT
+);
+
+-- Match Schedule table
+CREATE TABLE match_schedule (
+    match_id VARCHAR(10) NOT NULL PRIMARY KEY,
+    team1_id VARCHAR(10),
+    team2_id VARCHAR(10),
+    ground_id VARCHAR(10),
+    umpire1_id VARCHAR(10),
+    umpire2_id VARCHAR(10),
+    match_date DATE,
+    toss VARCHAR(10),
+    match_winner VARCHAR(10),
+    match_status ENUM('Completed', 'Upcoming', 'Cancelled', 'On-going') NOT NULL,
+    match_result ENUM('Win','Loss', 'Draw', 'Cancel', 'X') NOT NULL,
+    FOREIGN KEY (team1_id) REFERENCES team(team_id),
+    FOREIGN KEY (team2_id) REFERENCES team(team_id),
+    FOREIGN KEY (ground_id) REFERENCES ground(ground_id),
+    FOREIGN KEY (umpire1_id) REFERENCES umpire(umpire_id),
+    FOREIGN KEY (umpire2_id) REFERENCES umpire(umpire_id)
+);
+
+-- Player table
+CREATE TABLE player (
+    player_id VARCHAR(10) NOT NULL PRIMARY KEY,
+    player_name VARCHAR(100) NOT NULL,
+    player_age INT,
+    player_country VARCHAR(50),
+    player_role ENUM('Batsman', 'Bowler', 'All-rounder', 'Wicket-keeper') NOT NULL,
+    team_id VARCHAR(10),
+    match_id VARCHAR(10),
+    iscaptain BOOLEAN DEFAULT FALSE,
+    player_password VARCHAR(10) NOT NULL,
+    FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE SET NULL,
+    FOREIGN KEY (match_id) REFERENCES match_schedule(match_id) ON DELETE SET NULL
+);
+
+-- Score table
+CREATE TABLE ind_score (
+    player_id VARCHAR(10) NOT NULL,
+    team_id VARCHAR(10) NOT NULL,
+    match_id VARCHAR(10) NOT NULL,
+    runs INT,
+    wickets INT,
+    catches INT,
+    sixes INT,
+    fours INT,
+    PRIMARY KEY (player_id, match_id),
+    FOREIGN KEY (player_id) REFERENCES player(player_id),
+    FOREIGN KEY (team_id) REFERENCES team(team_id),
+    FOREIGN KEY (match_id) REFERENCES match_schedule(match_id)
+);
+
+-- Management table
+CREATE TABLE management (
+    mngt_user VARCHAR(50) NOT NULL PRIMARY KEY,
+    mngt_password VARCHAR(50) NOT NULL
+);
+
+-- Default management user
 INSERT INTO management (mngt_user, mngt_password) VALUES ('root', 'abc@123');
 
 -- Value Inserting

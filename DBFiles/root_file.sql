@@ -251,3 +251,8 @@ INSERT INTO ind_score (player_id, team_id, match_id, runs, wickets, catches, six
 ('P038', 'T003', 'M010', 44, 1, 2, 0, 1),
 ('P040', 'T001', 'M010', 11, 0, 2, 0, 1),
 ('P042', 'T003', 'M010', 58, 0, 2, 0, 4);
+
+UPDATE team SET team_password = 'aa6546bc78be36b92bb685a4edb4caaee6892bdd5ecdfdf5184f70b879d2876b' WHERE team_id = 'T001';
+UPDATE team SET team_password = 'bba11e65f4ace8a0c817d0d6293f90453c940097a2da6f6635daec2428241a19' WHERE team_id = 'T002';
+UPDATE team SET team_password = '1a628bf5362905a18f1dd11dbf51a032d40bfb37af2a238a282a986263b27f88' WHERE team_id = 'T003';
+UPDATE team SET team_password = '6788f4e93e7c613d0a8797e0bc37aef3b70385d64203ea63b4e68c1d0b454d5f' WHERE team_id = 'T004';

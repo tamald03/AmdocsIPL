@@ -1,10 +1,11 @@
+
 -- Create and select the database
 CREATE DATABASE IF NOT EXISTS amdocs_ipl;
 USE amdocs_ipl;
 
--- Drop tables if they exist (optional, useful during development)
+-- Drop tables if they exist
 DROP TABLE IF EXISTS ind_score, player, match_schedule, umpire, coach, team, ground, management;
-
+-- drop table team;
 -- Ground table
 CREATE TABLE ground (
     ground_id VARCHAR(10) NOT NULL PRIMARY KEY,
@@ -20,7 +21,7 @@ CREATE TABLE team (
     ground_id VARCHAR(10),
     team_budget INT,
     create_date DATE,
-    team_password VARCHAR(20) NOT NULL,
+    team_password VARCHAR(200) NOT NULL,
     FOREIGN KEY (ground_id) REFERENCES ground(ground_id) ON DELETE SET NULL
 );
 
@@ -73,7 +74,7 @@ CREATE TABLE player (
     team_id VARCHAR(10),
     match_id VARCHAR(10),
     iscaptain BOOLEAN DEFAULT FALSE,
-    player_password VARCHAR(10) NOT NULL,
+    player_password VARCHAR(100) NOT NULL,
     FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE SET NULL,
     FOREIGN KEY (match_id) REFERENCES match_schedule(match_id) ON DELETE SET NULL
 );
@@ -97,30 +98,23 @@ CREATE TABLE ind_score (
 -- Management table
 CREATE TABLE management (
     mngt_user VARCHAR(50) NOT NULL PRIMARY KEY,
-    mngt_password VARCHAR(50) NOT NULL
+    mngt_password VARCHAR(64) NOT NULL
 );
 
--- Default management user
-INSERT INTO management (mngt_user, mngt_password) VALUES ('root', 'abc@123');
+-- ===== DATA INSERTS =====
 
--- Value Inserting
-
---Grounds
+INSERT INTO management (mngt_user, mngt_password) VALUES 
+('root', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4');
 INSERT INTO ground (ground_id, ground_name, ground_location) VALUES
 ('G001', 'Wankhede Stadium', 'Mumbai'),
 ('G002', 'Eden Gardens', 'Kolkata'),
 ('G003', 'M. Chinnaswamy Stadium', 'Bangalore'),
 ('G004', 'Narendra Modi Stadium', 'Ahmedabad');
-
-
---teams
 INSERT INTO team (team_id, team_name, team_owner, ground_id, team_budget, create_date, team_password) VALUES
 ('T001', 'Mumbai Indians', 'Reliance Industries', 'G001', 95000000, '2008-04-01', 'mi@123'),
 ('T002', 'Kolkata Knight Riders', 'Red Chillies Entertainment', 'G002', 91000000, '2008-04-01', 'kkr@123'),
 ('T003', 'Royal Challengers Bangalore', 'United Spirits', 'G003', 92000000, '2008-04-01', 'rcb@123'),
 ('T004', 'Gujarat Titans', 'CVC Capital Partners', 'G004', 93000000, '2022-01-01', 'gt@123');
-
---coaches
 INSERT INTO coach (coach_id, coach_name, coach_role, coach_country, coach_work_exp, team_id) VALUES
 ('C001', 'Mahela Jayawardene', 'Head Coach', 'Sri Lanka', 12, 'T001'),
 ('C002', 'Shane Bond', 'Bowling Coach', 'New Zealand', 10, 'T001'),
@@ -133,9 +127,6 @@ INSERT INTO coach (coach_id, coach_name, coach_role, coach_country, coach_work_e
 
 ('C007', 'Ashish Nehra', 'Head Coach', 'India', 7, 'T004'),
 ('C008', 'Gary Kirsten', 'Batting Coach', 'South Africa', 14, 'T004');
-
-
---players
 INSERT INTO player (player_id, player_name, player_age, player_country, player_role, team_id, match_id, iscaptain, player_password) VALUES
 ('P001', 'Rohit Sharma', 36, 'India', 'Batsman', 'T001', NULL, TRUE, 'rohit@mi'),
 ('P002', 'Suryakumar Yadav', 34, 'India', 'Batsman', 'T001', NULL, FALSE, 'sky@mi'),
@@ -212,8 +203,6 @@ INSERT INTO player (player_id, player_name, player_age, player_country, player_r
 ('P073', 'Vicky Ostwal', 25, 'India', 'Bowler', 'T002', NULL, FALSE, 'vicky@ipl'),
 ('P074', 'Hrithik Shokeen', 26, 'India', 'All-rounder', 'T003', NULL, FALSE, 'hrithik@ipl'),
 ('P075', 'Suyash Sharma', 27, 'India', 'Wicket-keeper', 'T004', NULL, FALSE, 'suyash@ipl');
-
---Umpires
 INSERT INTO umpire (umpire_id, umpire_name, umpire_country, umpire_work_exp) VALUES
 ('U001', 'Nitin Menon', 'India', 10),
 ('U002', 'Sundaram Ravi', 'India', 15),
@@ -225,8 +214,6 @@ INSERT INTO umpire (umpire_id, umpire_name, umpire_country, umpire_work_exp) VAL
 ('U008', 'Paul Reiffel', 'Australia', 17),
 ('U009', 'Bruce Oxenford', 'Australia', 21),
 ('U010', 'Michael Gough', 'England', 14);
-
---matches
 INSERT INTO match_schedule (match_id, team1_id, team2_id, ground_id, umpire1_id, umpire2_id, match_date, toss, match_winner, match_status, match_result) VALUES
 ('M001', 'T001', 'T002', 'G001', 'U001', 'U002', '2025-04-01', 'T001', 'T001', 'Completed', 'Win'),
 ('M002', 'T003', 'T004', 'G003', 'U003', 'U004', '2025-04-02', 'T003', 'T004', 'Completed', 'Win'),
@@ -241,8 +228,6 @@ INSERT INTO match_schedule (match_id, team1_id, team2_id, ground_id, umpire1_id,
 ('M011', 'T001', 'T004', 'G001', 'U002', 'U003', '2025-04-11', 'T001', NULL, 'Upcoming', 'X'),
 ('M012', 'T002', 'T003', 'G002', 'U004', 'U005', '2025-04-12', 'T002', NULL, 'Upcoming', 'X'),
 ('M013', 'T001', 'T002', 'G001', 'U006', 'U007', '2025-04-13', 'T002', NULL, 'Upcoming', 'X');
-
---Leaderboard
 INSERT INTO ind_score (player_id, team_id, match_id, runs, wickets, catches, sixes, fours) VALUES
 ('P001', 'T001', 'M010', 9, 3, 1, 0, 0),
 ('P002', 'T001', 'M010', 10, 2, 0, 0, 1),

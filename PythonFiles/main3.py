@@ -32,42 +32,46 @@ class User(ABC):
 
 class Manager(User):
     def menu(self):
-        while True:
-            print("\n--- Manager Menu ---")
-            print("1. View All Teams")
-            print("2. View All Players by Team")
-            print("3. Count Players by Team")
-            print("4. Assign Player to Team")
-            print("5. Show Top 5 Run Scorers")
-            print("6. Show Top 5 Wicket Takers")
-            print("7. Show Points Table")
-            print("8. Add Management User")
-            print("9. Add Team")
-            print("10. Logout")
-            choice = input("Enter choice: ")
+        print("Entered Manager menu")
+        try:
+            while True:
+                print("\n--- Manager Menu ---")
+                print("1. View All Teams")
+                print("2. View All Players by Team")
+                print("3. Count Players by Team")
+                print("4. Assign Player to Team")
+                print("5. Show Top 5 Run Scorers")
+                print("6. Show Top 5 Wicket Takers")
+                print("7. Show Points Table")
+                print("8. Add Management User")
+                print("9. Add Team")
+                print("10. Logout")
+                choice = input("Enter choice: ")
 
-            if choice == "1":
-                self.view_teams()
-            elif choice == "2":
-                self.view_players_by_team()
-            elif choice == "3":
-                self.count_players_by_team()
-            elif choice == "4":
-                self.assign_player()
-            elif choice == "5":
-                self.top_run_scorers()
-            elif choice == "6":
-                self.top_wicket_takers()
-            elif choice == "7":
-                self.points_table()
-            elif choice == "8":
-                self.add_management_user()
-            elif choice == "9":
-                self.add_team()
-            elif choice == "10":
-                break
-            else:
-                print("Invalid option.")
+                if choice == "1":
+                    self.view_teams()
+                elif choice == "2":
+                    self.view_players_by_team()
+                elif choice == "3":
+                    self.count_players_by_team()
+                elif choice == "4":
+                    self.assign_player()
+                elif choice == "5":
+                    self.top_run_scorers()
+                elif choice == "6":
+                    self.top_wicket_takers()
+                elif choice == "7":
+                    self.points_table()
+                elif choice == "8":
+                    self.add_management_user()
+                elif choice == "9":
+                    self.add_team()
+                elif choice == "10":
+                    break
+                else:
+                    print("Invalid option.")
+        except Exception as e:
+            print("Error in Manager menu:", e)
 
     def view_teams(self):
         conn = get_connection()
@@ -208,7 +212,8 @@ class Manager(User):
                 stats[team2]["Points"] += 2
 
         table = PrettyTable(["Team", "Wins", "Losses", "Draw/Cancelled", "Points"])
-        for team_id, record in stats.items():
+        sorted_stats = sorted(stats.items(), key=lambda x: x[1]['Points'], reverse=True)
+        for team_id, record in sorted_stats:
             cursor.execute("SELECT team_name FROM team WHERE team_id = %s", (team_id,))
             team_name = cursor.fetchone()[0]
             table.add_row([
@@ -263,21 +268,25 @@ class Manager(User):
 
 class TeamUser(User):
     def menu(self):
-        while True:
-            print("\n--- Team Menu ---")
-            print("1. View My Players")
-            print("2. View My Coach")
-            print("3. Logout")
-            choice = input("Enter choice: ")
+        print("Entered Team menu")
+        try:
+            while True:
+                print("\n--- Team Menu ---")
+                print("1. View My Players")
+                print("2. View My Coach")
+                print("3. Logout")
+                choice = input("Enter choice: ")
 
-            if choice == "1":
-                self.view_my_players()
-            elif choice == "2":
-                self.view_my_coach()
-            elif choice == "3":
-                break
-            else:
-                print("Invalid option.")
+                if choice == "1":
+                    self.view_my_players()
+                elif choice == "2":
+                    self.view_my_coach()
+                elif choice == "3":
+                    break
+                else:
+                    print("Invalid option.")
+        except Exception as e:
+            print("Error in Team menu:", e)
 
     def view_my_players(self):
         team_id = self.username
@@ -316,6 +325,7 @@ def login():
     cursor.execute("SELECT mngt_password FROM management WHERE mngt_user = %s", (username,))
     manager = cursor.fetchone()
     if manager and manager[0] == hashed:
+        print("Logged in as Manager")
         Manager(username).menu()
         cursor.close()
         conn.close()
@@ -324,6 +334,7 @@ def login():
     cursor.execute("SELECT team_password FROM team WHERE team_id = %s", (username,))
     team = cursor.fetchone()
     if team and team[0] == hashed:
+        print("Logged in as Team")
         TeamUser(username).menu()
     else:
         print("Invalid credentials.")

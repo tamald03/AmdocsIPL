@@ -8,7 +8,7 @@ from prettytable import PrettyTable
 DB_CONFIG = {
     "host": "localhost",
     "user": "root",
-    "password": "abc@123",
+    "password": "****",  # Replace with your actual password
 }
 DB_NAME = "amdocs_ipl"
 
@@ -42,7 +42,7 @@ def initialize_database():
         team_id INT AUTO_INCREMENT PRIMARY KEY,
         team_name VARCHAR(100) NOT NULL UNIQUE,
         team_owner VARCHAR(100) NOT NULL,
-        budget DECIMAL(10,2) DEFAULT 100000000.00,
+        budget DECIMAL(10,2) DEFAULT 10000000.00,
         ground_id VARCHAR(10)
     )""")
 
@@ -180,7 +180,10 @@ class Manager(User):
             print("2. View All Players by Team")
             print("3. Count Players by Team")
             print("4. Assign Player to Team")
-            print("5. Logout")
+            print("5. Umpire Manage")
+            print("6. Schedule Match")
+            print("7. Venue Manage")
+            print("8. Logout")
             choice = input("Enter choice: ")
 
             if choice == "1":
@@ -192,6 +195,12 @@ class Manager(User):
             elif choice == "4":
                 self.assign_player()
             elif choice == "5":
+                self.umpire_manage()
+            elif choice == "6":
+                self.schedule_match()
+            elif choice == "7":
+                self.venue_manage()
+            elif choice == "8":
                 break
             else:
                 print("Invalid option.")
@@ -254,6 +263,112 @@ class Manager(User):
             conn.close()
         except Exception as e:
             print("Error:", e)
+
+    def umpire_manage(self):
+        while True:
+            print("\n--- Umpire Management ---")
+            print("1. Add Umpire")
+            print("2. Update Umpire")
+            print("3. Delete Umpire")
+            print("4. Back")
+            choice = input("Enter choice: ")
+
+            conn = get_connection()
+            cursor = conn.cursor()
+
+            if choice == "1":
+                name = input("Enter umpire name: ")
+                country = input("Enter country: ")
+                exp = int(input("Enter work experience (years): "))
+                cursor.execute("INSERT INTO umpire (umpire_name, umpire_country, umpire_work_exp) VALUES (%s, %s, %s)", (name, country, exp))
+                conn.commit()
+                print("Umpire added.")
+
+            elif choice == "2":
+                umpire_id = int(input("Enter Umpire ID to update: "))
+                name = input("New name: ")
+                country = input("New country: ")
+                exp = int(input("New experience (years): "))
+                cursor.execute("UPDATE umpire SET umpire_name=%s, umpire_country=%s, umpire_work_exp=%s WHERE umpire_id=%s", (name, country, exp, umpire_id))
+                conn.commit()
+                print("Umpire updated.")
+
+            elif choice == "3":
+                umpire_id = int(input("Enter Umpire ID to delete: "))
+                cursor.execute("DELETE FROM umpire WHERE umpire_id=%s", (umpire_id,))
+                conn.commit()
+                print("Umpire deleted.")
+
+            elif choice == "4":
+                cursor.close()
+                conn.close()
+                break
+            else:
+                print("Invalid option.")
+
+    def schedule_match(self):
+        conn = get_connection()
+        cursor = conn.cursor()
+        try:
+            team1 = int(input("Enter Team 1 ID: "))
+            team2 = int(input("Enter Team 2 ID: "))
+            ground = int(input("Enter Ground ID: "))
+            umpire1 = int(input("Enter Umpire 1 ID: "))
+            umpire2 = int(input("Enter Umpire 2 ID: "))
+            date = input("Enter Match Date (YYYY-MM-DD): ")
+            status = input("Enter Match Status (Completed/Upcoming/Cancelled/On-going): ")
+
+            cursor.execute("""
+                INSERT INTO match_schedule (team1_id, team2_id, ground_id, umpire1_id, umpire2_id, match_date, match_status)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (team1, team2, ground, umpire1, umpire2, date, status))
+            conn.commit()
+            print("Match scheduled successfully.")
+        except Exception as e:
+            print("Error scheduling match:", e)
+        finally:
+            cursor.close()
+            conn.close()
+
+    def venue_manage(self):
+        while True:
+            print("\n--- Venue Management ---")
+            print("1. Add Venue")
+            print("2. Update Venue")
+            print("3. Delete Venue")
+            print("4. Back")
+            choice = input("Enter choice: ")
+
+            conn = get_connection()
+            cursor = conn.cursor()
+
+            if choice == "1":
+                name = input("Enter venue name: ")
+                location = input("Enter location: ")
+                cursor.execute("INSERT INTO ground (ground_name, ground_location) VALUES (%s, %s)", (name, location))
+                conn.commit()
+                print("Venue added.")
+
+            elif choice == "2":
+                ground_id = int(input("Enter Ground ID to update: "))
+                name = input("New venue name: ")
+                location = input("New location: ")
+                cursor.execute("UPDATE ground SET ground_name=%s, ground_location=%s WHERE ground_id=%s", (name, location, ground_id))
+                conn.commit()
+                print("Venue updated.")
+
+            elif choice == "3":
+                ground_id = int(input("Enter Ground ID to delete: "))
+                cursor.execute("DELETE FROM ground WHERE ground_id=%s", (ground_id,))
+                conn.commit()
+                print("Venue deleted.")
+
+            elif choice == "4":
+                cursor.close()
+                conn.close()
+                break
+            else:
+                print("Invalid option.")
 
 class TeamUser(User):
     def menu(self):

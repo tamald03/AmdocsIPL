@@ -343,67 +343,20 @@ def login():
     cursor.close()
     conn.close()
 
-# ========== MAIN ==========
-def main():
-    while True:
-        print("\n==== IPL Management System ====")
-        print("1. Login")
-        print("2. Exit")
-        choice = input("Select option: ")
-        if choice == '1':
-            login()
-        elif choice == '2':
-            print("Goodbye!")
-            break
-        else:
-            print("Invalid option.")
-
 def manager_procedure_menu():
     while True:
         print("\n--- Advanced Manager Features ---")
         print("1. View Player Stats by Match")
-        print("2. View Team Performance Over Time")
-        print("3. Back to Manager Menu")
+        print("2. Back to Manager Menu")
         choice = input("Enter choice: ")
         if choice == "1":
-            view_player_stats_by_match()
-        elif choice == "2":
             view_team_performance_over_time()
-        elif choice == "3":
+        elif choice == "2":
             break
         else:
             print("Invalid option.")
 
-def view_player_stats_by_match():
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT 
-                ms.match_id,
-                p.player_name,
-                t.team_name,
-                i.runs,
-                i.wickets
-            FROM ind_score i
-            JOIN player p ON i.player_id = p.player_id
-            JOIN team t ON i.team_id = t.team_id
-            JOIN match_schedule ms ON i.match_id = ms.match_id
-            ORDER BY ms.match_id, p.player_name
-        """)
-        rows = cursor.fetchall()
-        if not rows:
-            print("No player stats available.")
-            return
-        table = PrettyTable(["Match ID", "Player", "Team", "Runs", "Wickets"])
-        for row in rows:
-            table.add_row(row)
-        print(table)
-    except Exception as e:
-        print("Error fetching player stats:", e)
-    finally:
-        cursor.close()
-        conn.close()
+
 
 def view_team_performance_over_time():
     try:
@@ -497,6 +450,22 @@ def top_wicket_takers():
         cursor.close()
         conn.close()
 
+# ========== MAIN ==========
+def main():
+    while True:
+        print("\n==== IPL Management System ====")
+        print("1. Login")
+        print("2. Exit")
+        choice = input("Select option: ")
+        if choice == '1':
+            login()
+        elif choice == '2':
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid option.")
 
 if __name__ == "__main__":
     main()
+
+

@@ -1,3 +1,4 @@
+
 import mysql.connector
 from mysql.connector import Error
 from abc import ABC, abstractmethod
@@ -135,44 +136,58 @@ class Manager(User):
             print("Error:", e)
 
     def top_run_scorers(self):
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT p.player_name, t.team_name, SUM(i.runs) as total_runs
-            FROM ind_score i
-            JOIN player p ON i.player_id = p.player_id
-            JOIN team t ON i.team_id = t.team_id
-            GROUP BY i.player_id
-            ORDER BY total_runs DESC
-            LIMIT 5
-        """)
-        rows = cursor.fetchall()
-        table = PrettyTable(["Player", "Team", "Runs"])
-        for row in rows:
-            table.add_row(row)
-        print(table)
-        cursor.close()
-        conn.close()
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT p.player_name, t.team_name, SUM(i.runs) as total_runs
+                FROM ind_score i
+                JOIN player p ON i.player_id = p.player_id
+                JOIN team t ON i.team_id = t.team_id
+                GROUP BY p.player_name, t.team_name
+                ORDER BY total_runs DESC
+                LIMIT 5
+            """)
+            rows = cursor.fetchall()
+            if not rows:
+                print("No run scorer data available.")
+                return
+            table = PrettyTable(["Player", "Team", "Runs"])
+            for row in rows:
+                table.add_row(row)
+            print(table)
+        except Exception as e:
+            print("Error fetching top run scorers:", e)
+        finally:
+            cursor.close()
+            conn.close()
 
     def top_wicket_takers(self):
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT p.player_name, t.team_name, SUM(i.wickets) as total_wickets
-            FROM ind_score i
-            JOIN player p ON i.player_id = p.player_id
-            JOIN team t ON i.team_id = t.team_id
-            GROUP BY i.player_id
-            ORDER BY total_wickets DESC
-            LIMIT 5
-        """)
-        rows = cursor.fetchall()
-        table = PrettyTable(["Player", "Team", "Wickets"])
-        for row in rows:
-            table.add_row(row)
-        print(table)
-        cursor.close()
-        conn.close()
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT p.player_name, t.team_name, SUM(i.wickets) as total_wickets
+                FROM ind_score i
+                JOIN player p ON i.player_id = p.player_id
+                JOIN team t ON i.team_id = t.team_id
+                GROUP BY p.player_name, t.team_name
+                ORDER BY total_wickets DESC
+                LIMIT 5
+            """)
+            rows = cursor.fetchall()
+            if not rows:
+                print("No wicket taker data available.")
+                return
+            table = PrettyTable(["Player", "Team", "Wickets"])
+            for row in rows:
+                table.add_row(row)
+            print(table)
+        except Exception as e:
+            print("Error fetching top wicket takers:", e)
+        finally:
+            cursor.close()
+            conn.close()
 
     def points_table(self):
         today = input("Enter date (YYYY-MM-DD): ")
@@ -268,55 +283,7 @@ class Manager(User):
             cursor.close()
             conn.close()
 
-class TeamUser(User):
-    def menu(self):
-        print("Entered Team menu")
-        try:
-            while True:
-                print("\n--- Team Menu ---")
-                print("1. View My Players")
-                print("2. View My Coach")
-                print("3. Logout")
-                choice = input("Enter choice: ")
-
-                if choice == "1":
-                    self.view_my_players()
-                elif choice == "2":
-                    self.view_my_coach()
-                elif choice == "3":
-                    break
-                else:
-                    print("Invalid option.")
-        except Exception as e:
-            print("Error in Team menu:", e)
-
-    def view_my_players(self):
-        team_id = self.username
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT player_id, player_name, player_role, player_country FROM player WHERE team_id = %s", (team_id,))
-        rows = cursor.fetchall()
-        table = PrettyTable(["ID", "Name", "Role", "Country"])
-        for row in rows:
-            table.add_row(row)
-        print(table)
-        cursor.close()
-        conn.close()
-
-    def view_my_coach(self):
-        team_id = self.username
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT coach_name, coach_role, coach_country, coach_work_exp FROM coach WHERE team_id = %s", (team_id,))
-        rows = cursor.fetchall()
-        table = PrettyTable(["Name", "Role", "Country", "Experience"])
-        for row in rows:
-            table.add_row(row)
-        print(table)
-        cursor.close()
-        conn.close()
-
-# ========== AUTH ==========
+# ========== MAIN ==========
 def login():
     username = input("Username: ")
     password = input("Password: ")
@@ -337,26 +304,83 @@ def login():
     team = cursor.fetchone()
     if team and team[0] == hashed:
         print("Logged in as Team")
-        TeamUser(username).menu()
+        # Use TeamUser here if defined
     else:
         print("Invalid credentials.")
     cursor.close()
     conn.close()
 
 def manager_procedure_menu():
+    print("\nAdvanced procedures not implemented here.")
+
+def main():
     while True:
-        print("\n--- Advanced Manager Features ---")
-        print("1. View Player Stats by Match")
-        print("2. Back to Manager Menu")
-        choice = input("Enter choice: ")
-        if choice == "1":
-            view_team_performance_over_time()
-        elif choice == "2":
+        print("\n==== IPL Management System ====")
+        print("1. Login")
+        print("2. Exit")
+        choice = input("Select option: ")
+        if choice == '1':
+            login()
+        elif choice == '2':
+            print("Goodbye!")
             break
         else:
             print("Invalid option.")
 
+def view_player_stats_by_match():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
 
+        # Get all matches that are completed or ongoing
+        cursor.execute("""
+            SELECT match_id FROM match_schedule
+            WHERE match_status IN ('Completed', 'On-going')
+            ORDER BY match_id
+        """)
+        valid_matches = [row[0] for row in cursor.fetchall()]
+
+        if not valid_matches:
+            print("No matches completed or running yet.")
+            return
+
+        print("Available Matches:", ", ".join(valid_matches))
+        match_id = input("Enter match ID to view stats (e.g., M001): ").strip().upper()
+
+        if match_id not in valid_matches:
+            print("Invalid match ID or match not started yet.")
+            return
+
+        cursor.execute("""
+            SELECT 
+                ms.match_id,
+                p.player_name,
+                t.team_name,
+                i.runs,
+                i.wickets
+            FROM ind_score i
+            JOIN player p ON i.player_id = p.player_id
+            JOIN team t ON i.team_id = t.team_id
+            JOIN match_schedule ms ON i.match_id = ms.match_id
+            WHERE ms.match_id = %s
+            ORDER BY p.player_name
+        """, (match_id,))
+        rows = cursor.fetchall()
+
+        if not rows:
+            print("No stats available for this match.")
+            return
+
+        table = PrettyTable(["Match ID", "Player", "Team", "Runs", "Wickets"])
+        for row in rows:
+            table.add_row(row)
+        print(table)
+
+    except Exception as e:
+        print("Error fetching player stats:", e)
+    finally:
+        cursor.close()
+        conn.close()
 
 def view_team_performance_over_time():
     try:
@@ -394,78 +418,18 @@ def view_team_performance_over_time():
         cursor.close()
         conn.close()
 
-# Updated top_run_scorers function
-def top_run_scorers():
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT p.player_name, t.team_name, SUM(i.runs) as total_runs
-            FROM ind_score i
-            JOIN player p ON i.player_id = p.player_id
-            JOIN team t ON i.team_id = t.team_id
-            GROUP BY p.player_name, t.team_name
-            ORDER BY total_runs DESC
-            LIMIT 5
-        """)
-        rows = cursor.fetchall()
-        if not rows:
-            print("No run scorer data available.")
-            return
-        table = PrettyTable(["Player", "Team", "Runs"])
-        for row in rows:
-            table.add_row(row)
-        print(table)
-    except Exception as e:
-        print("Error fetching top run scorers:", e)
-    finally:
-        cursor.close()
-        conn.close()
-
-# Updated top_wicket_takers function
-def top_wicket_takers():
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT p.player_name, t.team_name, SUM(i.wickets) as total_wickets
-            FROM ind_score i
-            JOIN player p ON i.player_id = p.player_id
-            JOIN team t ON i.team_id = t.team_id
-            GROUP BY p.player_name, t.team_name
-            ORDER BY total_wickets DESC
-            LIMIT 5
-        """)
-        rows = cursor.fetchall()
-        if not rows:
-            print("No wicket taker data available.")
-            return
-        table = PrettyTable(["Player", "Team", "Wickets"])
-        for row in rows:
-            table.add_row(row)
-        print(table)
-    except Exception as e:
-        print("Error fetching top wicket takers:", e)
-    finally:
-        cursor.close()
-        conn.close()
-
-# ========== MAIN ==========
-def main():
+def manager_procedure_menu():
     while True:
-        print("\n==== IPL Management System ====")
-        print("1. Login")
-        print("2. Exit")
-        choice = input("Select option: ")
-        if choice == '1':
-            login()
-        elif choice == '2':
-            print("Goodbye!")
+        print("\n--- Advanced Manager Features ---")
+        print("1. View Team Performance Over Time")
+        print("2. Back to Manager Menu")
+        choice = input("Enter choice: ")
+        if choice == "1":
+            view_team_performance_over_time()
+        elif choice == "2":
             break
         else:
             print("Invalid option.")
 
 if __name__ == "__main__":
     main()
-
-

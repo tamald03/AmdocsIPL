@@ -1,0 +1,11 @@
+Manager Login--
+
+Username-- root
+password-- 1234
+
+Team login---
+
+MI-- T001, mi@123
+KKR-- T002, kkr@123
+RCB-- T003, rcb@123
+GT-- T004, gt@123

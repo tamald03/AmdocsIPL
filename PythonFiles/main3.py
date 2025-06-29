@@ -45,7 +45,8 @@ class Manager(User):
                 print("7. Show Points Table")
                 print("8. Add Management User")
                 print("9. Add Team")
-                print("10. Logout")
+                print("10. Advanced Manager Features")
+                print("11. Logout")
                 choice = input("Enter choice: ")
 
                 if choice == "1":
@@ -67,6 +68,7 @@ class Manager(User):
                 elif choice == "9":
                     self.add_team()
                 elif choice == "10":
+                    manager_procedure_menu()
                     break
                 else:
                     print("Invalid option.")
@@ -355,6 +357,146 @@ def main():
             break
         else:
             print("Invalid option.")
+
+def manager_procedure_menu():
+    while True:
+        print("\n--- Advanced Manager Features ---")
+        print("1. View Player Stats by Match")
+        print("2. View Team Performance Over Time")
+        print("3. Back to Manager Menu")
+        choice = input("Enter choice: ")
+        if choice == "1":
+            view_player_stats_by_match()
+        elif choice == "2":
+            view_team_performance_over_time()
+        elif choice == "3":
+            break
+        else:
+            print("Invalid option.")
+
+def view_player_stats_by_match():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT 
+                ms.match_id,
+                p.player_name,
+                t.team_name,
+                i.runs,
+                i.wickets
+            FROM ind_score i
+            JOIN player p ON i.player_id = p.player_id
+            JOIN team t ON i.team_id = t.team_id
+            JOIN match_schedule ms ON i.match_id = ms.match_id
+            ORDER BY ms.match_id, p.player_name
+        """)
+        rows = cursor.fetchall()
+        if not rows:
+            print("No player stats available.")
+            return
+        table = PrettyTable(["Match ID", "Player", "Team", "Runs", "Wickets"])
+        for row in rows:
+            table.add_row(row)
+        print(table)
+    except Exception as e:
+        print("Error fetching player stats:", e)
+    finally:
+        cursor.close()
+        conn.close()
+
+def view_team_performance_over_time():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT 
+                ms.match_date,
+                t1.team_name AS Team1,
+                t2.team_name AS Team2,
+                ms.match_result,
+                ms.match_winner
+            FROM match_schedule ms
+            JOIN team t1 ON ms.team1_id = t1.team_id
+            JOIN team t2 ON ms.team2_id = t2.team_id
+            ORDER BY ms.match_date
+        """)
+        rows = cursor.fetchall()
+        winner_names = {}
+        for row in rows:
+            winner_id = row[4]
+            if winner_id and winner_id not in winner_names:
+                cursor.execute("SELECT team_name FROM team WHERE team_id = %s", (winner_id,))
+                result = cursor.fetchone()
+                winner_names[winner_id] = result[0] if result else "Unknown"
+        table = PrettyTable(["Date", "Team 1", "Team 2", "Result", "Winner"])
+        for row in rows:
+            match_date, team1, team2, result, winner_id = row
+            winner_name = winner_names.get(winner_id, "N/A") if winner_id else "N/A"
+            table.add_row([match_date, team1, team2, result, winner_name])
+        print(table)
+    except Exception as e:
+        print("Error fetching team performance:", e)
+    finally:
+        cursor.close()
+        conn.close()
+
+# Updated top_run_scorers function
+def top_run_scorers():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT p.player_name, t.team_name, SUM(i.runs) as total_runs
+            FROM ind_score i
+            JOIN player p ON i.player_id = p.player_id
+            JOIN team t ON i.team_id = t.team_id
+            GROUP BY p.player_name, t.team_name
+            ORDER BY total_runs DESC
+            LIMIT 5
+        """)
+        rows = cursor.fetchall()
+        if not rows:
+            print("No run scorer data available.")
+            return
+        table = PrettyTable(["Player", "Team", "Runs"])
+        for row in rows:
+            table.add_row(row)
+        print(table)
+    except Exception as e:
+        print("Error fetching top run scorers:", e)
+    finally:
+        cursor.close()
+        conn.close()
+
+# Updated top_wicket_takers function
+def top_wicket_takers():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT p.player_name, t.team_name, SUM(i.wickets) as total_wickets
+            FROM ind_score i
+            JOIN player p ON i.player_id = p.player_id
+            JOIN team t ON i.team_id = t.team_id
+            GROUP BY p.player_name, t.team_name
+            ORDER BY total_wickets DESC
+            LIMIT 5
+        """)
+        rows = cursor.fetchall()
+        if not rows:
+            print("No wicket taker data available.")
+            return
+        table = PrettyTable(["Player", "Team", "Wickets"])
+        for row in rows:
+            table.add_row(row)
+        print(table)
+    except Exception as e:
+        print("Error fetching top wicket takers:", e)
+    finally:
+        cursor.close()
+        conn.close()
+
 
 if __name__ == "__main__":
     main()

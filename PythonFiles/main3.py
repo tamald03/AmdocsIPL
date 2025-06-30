@@ -137,7 +137,7 @@ class Manager(User):
             cursor = conn.cursor()
             cursor.execute("UPDATE player SET team_id = %s WHERE player_id = %s", (new_team_id, player_id))
             conn.commit()
-            print("New player assigned.")
+            print("New Player assigned.")
             cursor.close()
             conn.close()
         except Exception as e:
@@ -386,17 +386,24 @@ class Manager(User):
             conn = get_connection()
             cursor = conn.cursor()
 
-            cursor.execute("SELECT team_id FROM player WHERE player_id = %s", (p1,))
-            t1 = cursor.fetchone()
-            cursor.execute("SELECT team_id FROM player WHERE player_id = %s", (p2,))
-            t2 = cursor.fetchone()
+            cursor.execute("SELECT team_id, iscaptain FROM player WHERE player_id = %s", (p1,))
+            result1 = cursor.fetchone()
+            cursor.execute("SELECT team_id, iscaptain FROM player WHERE player_id = %s", (p2,))
+            result2 = cursor.fetchone()
 
-            if not t1 or not t2:
+            if not result1 or not result2:
                 print("One or both players not found.")
                 return
 
-            cursor.execute("UPDATE player SET team_id = %s WHERE player_id = %s", (t2[0], p1))
-            cursor.execute("UPDATE player SET team_id = %s WHERE player_id = %s", (t1[0], p2))
+            t1, c1 = result1
+            t2, c2 = result2
+
+            if c1 != c2:
+                print("Exchange not allowed: one player is a captain and the other is not.")
+                return
+
+            cursor.execute("UPDATE player SET team_id = %s WHERE player_id = %s", (t2, p1))
+            cursor.execute("UPDATE player SET team_id = %s WHERE player_id = %s", (t1, p2))
             conn.commit()
             print("Players exchanged successfully.")
         except Exception as e:
@@ -404,6 +411,7 @@ class Manager(User):
         finally:
             cursor.close()
             conn.close()
+
 
     def view_player_stats(self):
         try:

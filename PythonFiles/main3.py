@@ -45,7 +45,6 @@ class Manager(User):
                 print("8. Add Management User")
                 print("9. Team Management")
                 print("10. Player Management")
-                print("11. Advanced Manager Features")
                 print("11. Logout")
                 print("12. View System Rules & Restrictions")
                 print("13. View Current Team Roster by Role")
@@ -74,9 +73,6 @@ class Manager(User):
                 elif choice == "11":
                     print("Logging out...")
                     return
-                    manager_procedure_menu()
-                elif choice == "11":
-                    break
                 elif choice == "12":
                     view_trigger_rules()
                 elif choice == "13":
@@ -368,12 +364,15 @@ class Manager(User):
             country = input("Enter Country: ")
             team_id = input("Enter Team ID: ")
             iscaptain = input("Is Captain? (yes/no): ").lower() == "yes"
+            password = getpass("Enter Player Password: ")
+            hashed_pw = hash_password(password)
+
             conn = get_connection()
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO player (player_id, player_name, player_role, player_country, team_id, iscaptain)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (player_id, name, role, country, team_id, iscaptain))
+                INSERT INTO player (player_id, player_name, player_role, player_country, team_id, iscaptain, player_password)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (player_id, name, role, country, team_id, iscaptain, hashed_pw))
             conn.commit()
             print("Player added successfully.")
         except Exception as e:
@@ -381,6 +380,7 @@ class Manager(User):
         finally:
             cursor.close()
             conn.close()
+
 
     def exchange_players(self):
         try:

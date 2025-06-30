@@ -48,7 +48,7 @@ class Manager(User):
                 print("11. View System Rules & Restrictions")
                 print("12. View Current Team Roster by Role")
                 print("13. View Team Captains")
-                print("11. Logout")
+                print("14. Logout")
                 choice = input("Enter choice: ")
                 if choice == "1":
                     self.view_teams()

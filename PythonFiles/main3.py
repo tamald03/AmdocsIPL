@@ -45,10 +45,10 @@ class Manager(User):
                 print("8. Add Management User")
                 print("9. Team Management")
                 print("10. Player Management")
+                print("11. View System Rules & Restrictions")
+                print("12. View Current Team Roster by Role")
+                print("13. View Team Captains")
                 print("11. Logout")
-                print("12. View System Rules & Restrictions")
-                print("13. View Current Team Roster by Role")
-                print("14. View Team Captains")
                 choice = input("Enter choice: ")
                 if choice == "1":
                     self.view_teams()
@@ -70,14 +70,14 @@ class Manager(User):
                     self.team_management_menu()
                 elif choice == "10":
                     self.player_management_menu()
-                elif choice == "11":
+                elif choice == "14":
                     print("Logging out...")
                     return
-                elif choice == "12":
+                elif choice == "11":
                     view_trigger_rules()
-                elif choice == "13":
+                elif choice == "12":
                     view_team_rosters_by_role()
-                elif choice == "14":
+                elif choice == "13":
                     view_team_captains()
                 else:
                     print("Invalid option.")
@@ -366,7 +366,6 @@ class Manager(User):
             iscaptain = input("Is Captain? (yes/no): ").lower() == "yes"
             password = getpass("Enter Player Password: ")
             hashed_pw = hash_password(password)
-
             conn = get_connection()
             cursor = conn.cursor()
             cursor.execute("""
@@ -380,8 +379,6 @@ class Manager(User):
         finally:
             cursor.close()
             conn.close()
-
-
     def exchange_players(self):
         try:
             p1 = input("Enter Player ID 1: ")

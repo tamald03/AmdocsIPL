@@ -137,7 +137,7 @@ class Manager(User):
             cursor = conn.cursor()
             cursor.execute("UPDATE player SET team_id = %s WHERE player_id = %s", (new_team_id, player_id))
             conn.commit()
-            print("Player reassigned.")
+            print("New player assigned.")
             cursor.close()
             conn.close()
         except Exception as e:

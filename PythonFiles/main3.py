@@ -1,8 +1,8 @@
-
 import mysql.connector
 from mysql.connector import Error
 from abc import ABC, abstractmethod
 import hashlib
+from getpass import getpass
 from prettytable import PrettyTable
 from datetime import datetime
 
@@ -43,12 +43,13 @@ class Manager(User):
                 print("6. Show Top 5 Wicket Takers")
                 print("7. Show Points Table")
                 print("8. Add Management User")
-                print("9. Add Team")
-                print("10. Advanced Manager Features")
-                print("11. View System Rules & Restrictions")
-                print("12. View Current Team Roster by Role")
-                print("13. View Team Captains")
-                print("14. Logout")
+                print("9. Team Management")
+                print("10. Player Management")
+                print("11. Advanced Manager Features")
+                print("11. Logout")
+                print("12. View System Rules & Restrictions")
+                print("13. View Current Team Roster by Role")
+                print("14. View Team Captains")
                 choice = input("Enter choice: ")
                 if choice == "1":
                     self.view_teams()
@@ -67,17 +68,19 @@ class Manager(User):
                 elif choice == "8":
                     self.add_management_user()
                 elif choice == "9":
-                    self.add_team()
+                    self.team_management_menu()
                 elif choice == "10":
+                    self.player_management_menu()
+                elif choice == "11":
                     manager_procedure_menu()
                 elif choice == "11":
-                    view_trigger_rules()
-                elif choice == "12":
-                    view_team_rosters_by_role()
-                elif choice == "13":
-                    view_team_captains()
-                elif choice == "14":
                     break
+                elif choice == "12":
+                    view_trigger_rules()
+                elif choice == "13":
+                    view_team_rosters_by_role()
+                elif choice == "14":
+                    view_team_captains()
                 else:
                     print("Invalid option.")
         except Exception as e:
@@ -143,58 +146,44 @@ class Manager(User):
             print("Error:", e)
 
     def top_run_scorers(self):
-        try:
-            conn = get_connection()
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT p.player_name, t.team_name, SUM(i.runs) as total_runs
-                FROM ind_score i
-                JOIN player p ON i.player_id = p.player_id
-                JOIN team t ON i.team_id = t.team_id
-                GROUP BY p.player_name, t.team_name
-                ORDER BY total_runs DESC
-                LIMIT 5
-            """)
-            rows = cursor.fetchall()
-            if not rows:
-                print("No run scorer data available.")
-                return
-            table = PrettyTable(["Player", "Team", "Runs"])
-            for row in rows:
-                table.add_row(row)
-            print(table)
-        except Exception as e:
-            print("Error fetching top run scorers:", e)
-        finally:
-            cursor.close()
-            conn.close()
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT p.player_name, t.team_name, SUM(i.runs) as total_runs
+            FROM ind_score i
+            JOIN player p ON i.player_id = p.player_id
+            JOIN team t ON i.team_id = t.team_id
+            GROUP BY p.player_name, t.team_name
+            ORDER BY total_runs DESC
+            LIMIT 5
+        """)
+        rows = cursor.fetchall()
+        table = PrettyTable(["Player", "Team", "Runs"])
+        for row in rows:
+            table.add_row(row)
+        print(table)
+        cursor.close()
+        conn.close()
 
     def top_wicket_takers(self):
-        try:
-            conn = get_connection()
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT p.player_name, t.team_name, SUM(i.wickets) as total_wickets
-                FROM ind_score i
-                JOIN player p ON i.player_id = p.player_id
-                JOIN team t ON i.team_id = t.team_id
-                GROUP BY p.player_name, t.team_name
-                ORDER BY total_wickets DESC
-                LIMIT 5
-            """)
-            rows = cursor.fetchall()
-            if not rows:
-                print("No wicket taker data available.")
-                return
-            table = PrettyTable(["Player", "Team", "Wickets"])
-            for row in rows:
-                table.add_row(row)
-            print(table)
-        except Exception as e:
-            print("Error fetching top wicket takers:", e)
-        finally:
-            cursor.close()
-            conn.close()
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT p.player_name, t.team_name, SUM(i.wickets) as total_wickets
+            FROM ind_score i
+            JOIN player p ON i.player_id = p.player_id
+            JOIN team t ON i.team_id = t.team_id
+            GROUP BY p.player_name, t.team_name
+            ORDER BY total_wickets DESC
+            LIMIT 5
+        """)
+        rows = cursor.fetchall()
+        table = PrettyTable(["Player", "Team", "Wickets"])
+        for row in rows:
+            table.add_row(row)
+        print(table)
+        cursor.close()
+        conn.close()
 
     def points_table(self):
         today = input("Enter date (YYYY-MM-DD): ")
@@ -261,6 +250,28 @@ class Manager(User):
             cursor.close()
             conn.close()
 
+    def team_management_menu(self):
+        try:
+            while True:
+                print("\n--- Team Management ---")
+                print("1. Add Team")
+                print("2. Delete Team")
+                print("3. Update Team")
+                print("4. Back to Manager Menu")
+                choice = input("Enter choice: ")
+                if choice == "1":
+                    self.add_team()
+                elif choice == "2":
+                    self.delete_team()
+                elif choice == "3":
+                    self.update_team()
+                elif choice == "4":
+                    break
+                else:
+                    print("Invalid option.")
+        except Exception as e:
+            print("Error in Team Management:", e)
+
     def add_team(self):
         team_id = input("Enter new Team ID: ")
         name = input("Enter team name: ")
@@ -285,21 +296,217 @@ class Manager(User):
             cursor.close()
             conn.close()
 
-def manager_procedure_menu():
-    while True:
-        print("\n--- Advanced Manager Features ---")
-        print("1. View Player Stats by Match")
-        print("2. View Team Performance Over Time")
-        print("3. Back to Manager Menu")
-        choice = input("Enter choice: ")
-        if choice == "1":
-            view_player_stats_by_match()
-        elif choice == "2":
-            view_team_performance_over_time()
-        elif choice == "3":
-            break
-        else:
-            print("Invalid option.")
+    def delete_team(self):
+        team_id = input("Enter Team ID to delete: ")
+        conn = get_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("DELETE FROM team WHERE team_id = %s", (team_id,))
+            conn.commit()
+            print("Team deleted successfully.")
+        except Exception as e:
+            print("Error deleting team:", e)
+        finally:
+            cursor.close()
+            conn.close()
+
+    def update_team(self):
+        team_id = input("Enter Team ID to update: ")
+        name = input("Enter new team name: ")
+        owner = input("Enter new owner name: ")
+        ground_id = input("Enter new ground ID: ")
+        budget = int(input("Enter new budget: "))
+        create_date = input("Enter new creation date (YYYY-MM-DD): ")
+        password = input("Enter new password: ")
+        hashed_pw = hash_password(password)
+        conn = get_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                UPDATE team
+                SET team_name = %s, team_owner = %s, ground_id = %s, team_budget = %s, create_date = %s, team_password = %s
+                WHERE team_id = %s
+            """, (name, owner, ground_id, budget, create_date, hashed_pw, team_id))
+            conn.commit()
+            print("Team updated successfully.")
+        except Exception as e:
+            print("Error updating team:", e)
+        finally:
+            cursor.close()
+            conn.close()
+
+
+    def player_management_menu(self):
+        try:
+            while True:
+                print("\n--- Player Management ---")
+                print("1. Add Player")
+                print("2. Exchange Two Players Between Teams")
+                print("3. View Player Stats by ID")
+                print("4. Back to Manager Menu")
+                choice = input("Enter choice: ")
+                if choice == "1":
+                    self.add_player()
+                elif choice == "2":
+                    self.exchange_players()
+                elif choice == "3":
+                    self.view_player_stats()
+                elif choice == "4":
+                    break
+                else:
+                    print("Invalid option.")
+        except Exception as e:
+            print("Error in Player Management:", e)
+
+    def add_player(self):
+        try:
+            player_id = input("Enter Player ID: ")
+            name = input("Enter Player Name: ")
+            role = input("Enter Role (Batsman/Bowler/All-rounder): ")
+            country = input("Enter Country: ")
+            team_id = input("Enter Team ID: ")
+            iscaptain = input("Is Captain? (yes/no): ").lower() == "yes"
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO player (player_id, player_name, player_role, player_country, team_id, iscaptain)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (player_id, name, role, country, team_id, iscaptain))
+            conn.commit()
+            print("Player added successfully.")
+        except Exception as e:
+            print("Error adding player:", e)
+        finally:
+            cursor.close()
+            conn.close()
+
+    def exchange_players(self):
+        try:
+            p1 = input("Enter Player ID 1: ")
+            p2 = input("Enter Player ID 2: ")
+            conn = get_connection()
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT team_id FROM player WHERE player_id = %s", (p1,))
+            t1 = cursor.fetchone()
+            cursor.execute("SELECT team_id FROM player WHERE player_id = %s", (p2,))
+            t2 = cursor.fetchone()
+
+            if not t1 or not t2:
+                print("One or both players not found.")
+                return
+
+            cursor.execute("UPDATE player SET team_id = %s WHERE player_id = %s", (t2[0], p1))
+            cursor.execute("UPDATE player SET team_id = %s WHERE player_id = %s", (t1[0], p2))
+            conn.commit()
+            print("Players exchanged successfully.")
+        except Exception as e:
+            print("Error exchanging players:", e)
+        finally:
+            cursor.close()
+            conn.close()
+
+    def view_player_stats(self):
+        try:
+            player_id = input("Enter Player ID: ")
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT p.player_name, t.team_name, SUM(i.runs), SUM(i.wickets)
+                FROM ind_score i
+                JOIN player p ON i.player_id = p.player_id
+                JOIN team t ON i.team_id = t.team_id
+                WHERE i.player_id = %s
+                GROUP BY p.player_name, t.team_name
+            """, (player_id,))
+            row = cursor.fetchone()
+            if row:
+                table = PrettyTable(["Player", "Team", "Total Runs", "Total Wickets"])
+                table.add_row(row)
+                print(table)
+            else:
+                print("No stats found for given player ID.")
+        except Exception as e:
+            print("Error viewing player stats:", e)
+        finally:
+            cursor.close()
+            conn.close()
+def login():
+    username = input("Username: ")
+    password = getpass("Password: ")
+    hashed = hash_password(password)
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT mngt_password FROM management WHERE mngt_user = %s", (username,))
+    manager = cursor.fetchone()
+    if manager and manager[0] == hashed:
+        print("Logged in as Manager")
+        Manager(username).menu()
+        cursor.close()
+        conn.close()
+        return
+
+    cursor.execute("SELECT team_password FROM team WHERE team_id = %s", (username,))
+    team = cursor.fetchone()
+    if team and team[0] == hashed:
+        print("Logged in as Team")
+        TeamUser(username).menu()
+        cursor.close()
+        conn.close()
+        return
+
+    print("Invalid credentials.")
+    cursor.close()
+    conn.close()
+
+class TeamUser(User):
+    def menu(self):
+        print("Entered Team menu")
+        try:
+            while True:
+                print("\n--- Team Menu ---")
+                print("1. View My Players")
+                print("2. View My Coach")
+                print("3. Logout")
+                choice = input("Enter choice: ")
+                if choice == "1":
+                    self.view_my_players()
+                elif choice == "2":
+                    self.view_my_coach()
+                elif choice == "3":
+                    break
+                else:
+                    print("Invalid option.")
+        except Exception as e:
+            print("Error in Team menu:", e)
+
+    def view_my_players(self):
+        team_id = self.username
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT player_id, player_name, player_role, player_country FROM player WHERE team_id = %s", (team_id,))
+        rows = cursor.fetchall()
+        table = PrettyTable(["ID", "Name", "Role", "Country"])
+        for row in rows:
+            table.add_row(row)
+        print(table)
+        cursor.close()
+        conn.close()
+
+    def view_my_coach(self):
+        team_id = self.username
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT coach_name, coach_role, coach_country, coach_work_exp FROM coach WHERE team_id = %s", (team_id,))
+        rows = cursor.fetchall()
+        table = PrettyTable(["Name", "Role", "Country", "Experience"])
+        for row in rows:
+            table.add_row(row)
+        print(table)
+        cursor.close()
+        conn.close()
+
 
 def view_trigger_rules():
     print("\nSystem Rules & Restrictions (Enforced by Database Triggers):\n")
@@ -360,90 +567,8 @@ def view_team_captains():
         cursor.close()
         conn.close()
 
-def view_player_stats_by_match():
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT match_id FROM match_schedule WHERE match_status IN ('Completed', 'On-going') ORDER BY match_id")
-        valid_matches = [row[0] for row in cursor.fetchall()]
-        if not valid_matches:
-            print("No matches available.")
-            return
-        print("Available Matches:", ", ".join(valid_matches))
-        match_id = input("Enter match ID to view stats (e.g., M001): ").strip().upper()
-        if match_id not in valid_matches:
-            print("Invalid match ID.")
-            return
-        cursor.execute("""
-            SELECT ms.match_id, p.player_name, t.team_name, i.runs, i.wickets
-            FROM ind_score i
-            JOIN player p ON i.player_id = p.player_id
-            JOIN team t ON i.team_id = t.team_id
-            JOIN match_schedule ms ON i.match_id = ms.match_id
-            WHERE ms.match_id = %s
-            ORDER BY p.player_name
-        """, (match_id,))
-        rows = cursor.fetchall()
-        if not rows:
-            print("No stats available for this match.")
-            return
-        table = PrettyTable(["Match ID", "Player", "Team", "Runs", "Wickets"])
-        for row in rows:
-            table.add_row(row)
-        print(table)
-    except Exception as e:
-        print("Error fetching player stats:", e)
-    finally:
-        cursor.close()
-        conn.close()
-
-def view_team_performance_over_time():
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT ms.match_date, t1.team_name AS Team1, t2.team_name AS Team2, ms.match_result, ms.match_winner
-            FROM match_schedule ms
-            JOIN team t1 ON ms.team1_id = t1.team_id
-            JOIN team t2 ON ms.team2_id = t2.team_id
-            ORDER BY ms.match_date
-        """)
-        rows = cursor.fetchall()
-        winner_names = {}
-        for row in rows:
-            winner_id = row[4]
-            if winner_id and winner_id not in winner_names:
-                cursor.execute("SELECT team_name FROM team WHERE team_id = %s", (winner_id,))
-                result = cursor.fetchone()
-                winner_names[winner_id] = result[0] if result else "Unknown"
-        table = PrettyTable(["Date", "Team 1", "Team 2", "Result", "Winner"])
-        for row in rows:
-            match_date, team1, team2, result, winner_id = row
-            winner_name = winner_names.get(winner_id, "N/A") if winner_id else "N/A"
-            table.add_row([match_date, team1, team2, result, winner_name])
-        print(table)
-    except Exception as e:
-        print("Error fetching team performance:", e)
-    finally:
-        cursor.close()
-        conn.close()
-
-
-def login():
-    username = input("Username: ")
-    password = input("Password: ")
-    hashed = hash_password(password)
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT mngt_password FROM management WHERE mngt_user = %s", (username,))
-    manager = cursor.fetchone()
-    if manager and manager[0] == hashed:
-        print("Logged in as Manager")
-        Manager(username).menu()
-    else:
-        print("Invalid credentials.")
-    cursor.close()
-    conn.close()
+def manager_procedure_menu():
+    print("\n(Advanced features placeholder — to be implemented)")
 
 def main():
     while True:
@@ -459,83 +584,6 @@ def main():
         else:
             print("Invalid option.")
 
-class TeamUser(User):
-    def menu(self):
-        print("Entered Team menu")
-        try:
-            while True:
-                print("\n--- Team Menu ---")
-                print("1. View My Players")
-                print("2. View My Coach")
-                print("3. Logout")
-                choice = input("Enter choice: ")
-                if choice == "1":
-                    self.view_my_players()
-                elif choice == "2":
-                    self.view_my_coach()
-                elif choice == "3":
-                    break
-                else:
-                    print("Invalid option.")
-        except Exception as e:
-            print("Error in Team menu:", e)
-
-    def view_my_players(self):
-        team_id = self.username
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT player_id, player_name, player_role, player_country FROM player WHERE team_id = %s", (team_id,))
-        rows = cursor.fetchall()
-        table = PrettyTable(["ID", "Name", "Role", "Country"])
-        for row in rows:
-            table.add_row(row)
-        print(table)
-        cursor.close()
-        conn.close()
-
-    def view_my_coach(self):
-        team_id = self.username
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT coach_name, coach_role, coach_country, coach_work_exp FROM coach WHERE team_id = %s", (team_id,))
-        rows = cursor.fetchall()
-        table = PrettyTable(["Name", "Role", "Country", "Experience"])
-        for row in rows:
-            table.add_row(row)
-        print(table)
-        cursor.close()
-        conn.close()
-
-def login():
-    username = input("Username: ")
-    password = input("Password: ")
-    hashed = hash_password(password)
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    # Check Manager
-    cursor.execute("SELECT mngt_password FROM management WHERE mngt_user = %s", (username,))
-    manager = cursor.fetchone()
-    if manager and manager[0] == hashed:
-        print("Logged in as Manager")
-        cursor.close()
-        conn.close()
-        Manager(username).menu()
-        return
-
-    # Check Team
-    cursor.execute("SELECT team_password FROM team WHERE team_id = %s", (username,))
-    team = cursor.fetchone()
-    if team and team[0] == hashed:
-        print("Logged in as Team")
-        cursor.close()
-        conn.close()
-        TeamUser(username).menu()
-        return
-
-    print("Invalid credentials.")
-    cursor.close()
-    conn.close()
 
 if __name__ == "__main__":
     main()

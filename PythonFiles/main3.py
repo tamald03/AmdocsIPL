@@ -72,6 +72,8 @@ class Manager(User):
                 elif choice == "10":
                     self.player_management_menu()
                 elif choice == "11":
+                    print("Logging out...")
+                    return
                     manager_procedure_menu()
                 elif choice == "11":
                     break

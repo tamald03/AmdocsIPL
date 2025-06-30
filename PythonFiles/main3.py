@@ -304,7 +304,7 @@ def login():
     team = cursor.fetchone()
     if team and team[0] == hashed:
         print("Logged in as Team")
-        # Use TeamUser here if defined
+        TeamUser(username).menu()
     else:
         print("Invalid credentials.")
     cursor.close()
@@ -430,6 +430,58 @@ def manager_procedure_menu():
             break
         else:
             print("Invalid option.")
+
+
+# ========== TEAM USER CLASS ==========
+class TeamUser(User):
+    def menu(self):
+        print(f"Welcome, Team {self.username}!")
+        while True:
+            print("\n--- Team Menu ---")
+            print("1. View Team Players")
+            print("2. View Team Coaches")
+            print("3. Logout")
+            choice = input("Enter choice: ")
+            if choice == "1":
+                self.view_team_players()
+            elif choice == "2":
+                self.view_team_coaches()
+            elif choice == "3":
+                break
+            else:
+                print("Invalid option.")
+
+    def view_team_players(self):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT player_name, player_role, player_country
+            FROM player
+            WHERE team_id = %s
+        """, (self.username,))
+        rows = cursor.fetchall()
+        table = PrettyTable(["Name", "Role", "Country"])
+        for row in rows:
+            table.add_row(row)
+        print(table)
+        cursor.close()
+        conn.close()
+
+    def view_team_coaches(self):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT coach_name, coach_role, coach_country
+            FROM coach
+            WHERE team_id = %s
+        """, (self.username,))
+        rows = cursor.fetchall()
+        table = PrettyTable(["Name", "Role", "Country"])
+        for row in rows:
+            table.add_row(row)
+        print(table)
+        cursor.close()
+        conn.close()
 
 if __name__ == "__main__":
     main()

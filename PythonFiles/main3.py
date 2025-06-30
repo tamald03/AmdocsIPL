@@ -45,10 +45,10 @@ class Manager(User):
                 print("8. Add Management User")
                 print("9. Add Team")
                 print("10. Advanced Manager Features")
-                print("11. View System Rules & Restrictions")
-                print("12. View Current Team Roster by Role")
-                print("13. View Team Captains")
-                print("14. Logout")
+                print("11. Logout")
+                print("12. View System Rules & Restrictions")
+                print("13. View Current Team Roster by Role")
+                print("14. View Team Captains")
                 choice = input("Enter choice: ")
                 if choice == "1":
                     self.view_teams()
@@ -71,13 +71,13 @@ class Manager(User):
                 elif choice == "10":
                     manager_procedure_menu()
                 elif choice == "11":
-                    view_trigger_rules()
-                elif choice == "12":
-                    view_team_rosters_by_role()
-                elif choice == "13":
-                    view_team_captains()
-                elif choice == "14":
                     break
+                elif choice == "12":
+                    view_trigger_rules()
+                elif choice == "13":
+                    view_team_rosters_by_role()
+                elif choice == "14":
+                    view_team_captains()
                 else:
                     print("Invalid option.")
         except Exception as e:
@@ -458,6 +458,84 @@ def main():
             break
         else:
             print("Invalid option.")
+
+class TeamUser(User):
+    def menu(self):
+        print("Entered Team menu")
+        try:
+            while True:
+                print("\n--- Team Menu ---")
+                print("1. View My Players")
+                print("2. View My Coach")
+                print("3. Logout")
+                choice = input("Enter choice: ")
+                if choice == "1":
+                    self.view_my_players()
+                elif choice == "2":
+                    self.view_my_coach()
+                elif choice == "3":
+                    break
+                else:
+                    print("Invalid option.")
+        except Exception as e:
+            print("Error in Team menu:", e)
+
+    def view_my_players(self):
+        team_id = self.username
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT player_id, player_name, player_role, player_country FROM player WHERE team_id = %s", (team_id,))
+        rows = cursor.fetchall()
+        table = PrettyTable(["ID", "Name", "Role", "Country"])
+        for row in rows:
+            table.add_row(row)
+        print(table)
+        cursor.close()
+        conn.close()
+
+    def view_my_coach(self):
+        team_id = self.username
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT coach_name, coach_role, coach_country, coach_work_exp FROM coach WHERE team_id = %s", (team_id,))
+        rows = cursor.fetchall()
+        table = PrettyTable(["Name", "Role", "Country", "Experience"])
+        for row in rows:
+            table.add_row(row)
+        print(table)
+        cursor.close()
+        conn.close()
+
+def login():
+    username = input("Username: ")
+    password = input("Password: ")
+    hashed = hash_password(password)
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Check Manager
+    cursor.execute("SELECT mngt_password FROM management WHERE mngt_user = %s", (username,))
+    manager = cursor.fetchone()
+    if manager and manager[0] == hashed:
+        print("Logged in as Manager")
+        cursor.close()
+        conn.close()
+        Manager(username).menu()
+        return
+
+    # Check Team
+    cursor.execute("SELECT team_password FROM team WHERE team_id = %s", (username,))
+    team = cursor.fetchone()
+    if team and team[0] == hashed:
+        print("Logged in as Team")
+        cursor.close()
+        conn.close()
+        TeamUser(username).menu()
+        return
+
+    print("Invalid credentials.")
+    cursor.close()
+    conn.close()
 
 if __name__ == "__main__":
     main()

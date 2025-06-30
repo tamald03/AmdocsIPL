@@ -45,10 +45,12 @@ class Manager(User):
                 print("8. Add Management User")
                 print("9. Team Management")
                 print("10. Player Management")
-                print("11. View System Rules & Restrictions")
-                print("12. View Current Team Roster by Role")
-                print("13. View Team Captains")
-                print("14. Logout")
+                print("11. Umpire Management")
+                print("12. Ground Management")
+                print("13. View System Rules & Restrictions")
+                print("14. View Current Team Roster by Role")
+                print("15. View Team Captains")
+                print("16. Logout")
                 choice = input("Enter choice: ")
                 if choice == "1":
                     self.view_teams()
@@ -70,19 +72,103 @@ class Manager(User):
                     self.team_management_menu()
                 elif choice == "10":
                     self.player_management_menu()
-                elif choice == "14":
+                elif choice == "16":
                     print("Logging out...")
                     return
-                elif choice == "11":
-                    view_trigger_rules()
-                elif choice == "12":
-                    view_team_rosters_by_role()
                 elif choice == "13":
+                    view_trigger_rules()
+                elif choice == "14":
+                    view_team_rosters_by_role()
+                elif choice == "11":
+                     self.umpire_management_menu()
+                elif choice == "12":
+                    self.ground_management_menu()
+                elif choice == "15":
                     view_team_captains()
                 else:
                     print("Invalid option.")
         except Exception as e:
             print("Error in Manager menu:", e)
+
+    def umpire_management_menu(self):
+        while True:
+            print("\n--- Umpire Management ---")
+            print("1. Show Umpire Details")
+            print("2. Add Umpire")
+            print("3. Delete Umpire")
+            print("4. Back to Manager Menu")
+            choice = input("Enter choice: ")
+            conn = get_connection()
+            cursor = conn.cursor()
+            try:
+                if choice == "1":
+                    cursor.execute("SELECT * FROM umpire")
+                    rows = cursor.fetchall()
+                    table = PrettyTable([i[0] for i in cursor.description])
+                    for row in rows:
+                        table.add_row(row)
+                    print(table)
+                elif choice == "2":
+                    uid = input("Enter Umpire ID: ")
+                    name = input("Enter Umpire Name: ")
+                    country = input("Enter Country: ")
+                    cursor.execute("INSERT INTO umpire (umpire_id, umpire_name, umpire_country) VALUES (%s, %s, %s)", (uid, name, country))
+                    conn.commit()
+                    print("Umpire added successfully.")
+                elif choice == "3":
+                    uid = input("Enter Umpire ID to delete: ")
+                    cursor.execute("DELETE FROM umpire WHERE umpire_id = %s", (uid,))
+                    conn.commit()
+                    print("Umpire deleted successfully.")
+                elif choice == "4":
+                    break
+                else:
+                    print("Invalid choice")
+            except Exception as e:
+                print("Error:", e)
+            finally:
+                cursor.close()
+                conn.close()
+
+    def ground_management_menu(self):
+        while True:
+            print("\n--- Ground Management ---")
+            print("1. Show Ground Details")
+            print("2. Add Ground")
+            print("3. Delete Ground")
+            print("4. Back to Manager Menu")
+            choice = input("Enter choice: ")
+            conn = get_connection()
+            cursor = conn.cursor()
+            try:
+                if choice == "1":
+                    cursor.execute("SELECT g.ground_id, g.ground_name, g.ground_location, t.team_name FROM ground g LEFT JOIN team t ON g.ground_id = t.ground_id")
+                    rows = cursor.fetchall()
+                    table = PrettyTable(["Ground ID", "Ground Name", "Location", "Assigned Team"])
+                    for row in rows:
+                        table.add_row(row)
+                    print(table)
+                elif choice == "2":
+                    gid = input("Enter Ground ID: ")
+                    name = input("Enter Ground Name: ")
+                    location = input("Enter Ground Location: ")
+                    cursor.execute("INSERT INTO ground (ground_id, ground_name, ground_location) VALUES (%s, %s, %s)", (gid, name, location))
+                    conn.commit()
+                    print("Ground added successfully.")
+                elif choice == "3":
+                    gid = input("Enter Ground ID to delete: ")
+                    cursor.execute("DELETE FROM ground WHERE ground_id = %s", (gid,))
+                    conn.commit()
+                    print("Ground deleted successfully.")
+                elif choice == "4":
+                    break
+                else:
+                    print("Invalid choice")
+            except Exception as e:
+                print("Error:", e)
+            finally:
+                cursor.close()
+                conn.close()
 
     def view_teams(self):
         conn = get_connection()

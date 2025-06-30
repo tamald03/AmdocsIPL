@@ -45,10 +45,10 @@ class Manager(User):
                 print("8. Add Management User")
                 print("9. Add Team")
                 print("10. Advanced Manager Features")
-                print("11. Logout")
-                print("12. View System Rules & Restrictions")
-                print("13. View Current Team Roster by Role")
-                print("14. View Team Captains")
+                print("11. View System Rules & Restrictions")
+                print("12. View Current Team Roster by Role")
+                print("13. View Team Captains")
+                print("14. Logout")
                 choice = input("Enter choice: ")
                 if choice == "1":
                     self.view_teams()
@@ -71,13 +71,13 @@ class Manager(User):
                 elif choice == "10":
                     manager_procedure_menu()
                 elif choice == "11":
-                    break
-                elif choice == "12":
                     view_trigger_rules()
-                elif choice == "13":
+                elif choice == "12":
                     view_team_rosters_by_role()
-                elif choice == "14":
+                elif choice == "13":
                     view_team_captains()
+                elif choice == "14":
+                    break
                 else:
                     print("Invalid option.")
         except Exception as e:
